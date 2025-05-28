@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchased Courses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="https://img.freepik.com/premium-vector/courses-logo-icon-brand-identity-sign-symbol-template_880781-2160.jpg" class="h-10 w-10" alt="Logo" />
+                <span class="text-2xl font-bold text-blue-600">EduMaster</span>
+            </div>
+            <nav class="space-x-4">
+                <a href="http://localhost:3000/home" class="text-gray-700 hover:text-blue-600">Home</a>
+                <a href="http://localhost:3000/purchases" class="text-gray-700 hover:text-blue-600">Purchased Courses</a>
+                <a href="#" class="text-gray-700 hover:text-blue-600">About</a>
+                <a href="#" class="text-gray-700 hover:text-blue-600">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Purchased Courses Section -->
+    <div class="container mx-auto px-6 py-12">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Purchased Courses</h1>
+        <div id="results" class="w-full ">
+
+            <!-- Courses will be injected here -->
+        </div>
+    </div>
+
+    <footer class="bg-white py-6 mt-12 shadow-inner">
+        <div class="container mx-auto px-6 text-center text-sm text-gray-500">
+            &copy; 2025 EduMaster. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        let container = document.getElementById("results");
+
+        async function purchased() {
+            const res = await fetch("http://localhost:3000/user/purchases", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "token": localStorage.getItem("token")
+                }
+            });
+
+            const data = await res.json();
+
+            if (data.purchased && data.purchased.length > 0) {
+                data.purchased.map(course => {
+                    const card = document.createElement("div");
+                    card.className = "bg-white p-6 rounded-lg shadow hover:shadow-lg transition w-full m-3";
+                    card.innerHTML = `
+                    <h1 class = " text-xl font-bold text-gray-800 mb-2">CourseId: ${course.courseId}</h1>
+                    <p class = "text-gray-600 text-sm">UserId: ${course.userId}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500">No purchased courses found.</p>';
+            }
+        }
+
+        purchased();
+    </script>
+</body>
+</html>

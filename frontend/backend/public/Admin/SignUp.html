@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Signup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <form onsubmit="signup(event)" class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Admin Signup</h1>
+    
+    <input
+      type="email"
+      id="email"
+      placeholder="Enter Your Email"
+      class="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      required
+    />
+    <input
+      type="password"
+      id="password"
+      placeholder="Enter Password"
+      class="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      required
+    />
+    <input
+      type="text"
+      id="firstname"
+      placeholder="Enter Your First Name"
+      class="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      required
+    />
+    <input
+      type="text"
+      id="lastname"
+      placeholder="Enter Your Last Name"
+      class="w-full mb-6 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      required
+    />
+    <button
+      type="submit"
+      class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+    >
+      Signup
+    </button>
+    <p id="success"></p>
+    <p id="message" class="text-red-500"></p>
+  </form>
+
+  <script>
+    let success = document.getElementById("success")
+    let message = document.getElementById("message")
+
+    async function signup(e) {
+      e.preventDefault();
+      let email = document.getElementById("email").value;
+      let password = document.getElementById("password").value;
+      let firstname = document.getElementById("firstname").value;
+      let lastname = document.getElementById("lastname").value;
+
+      const payload = { email, password, firstname, lastname };
+
+      const res = await fetch("http://localhost:3000/admin/signup", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      console.log(data);
+
+      if (res.ok) {
+        console.log(data.message);
+        success.textContent = "Signed Up Successfully..."
+        window.location.href = "http://localhost:3000/adminLogin";
+
+      }else  {
+        message.textContent = "Email already exists"
+      }
+    }
+  </script>
+</body>
+</html>

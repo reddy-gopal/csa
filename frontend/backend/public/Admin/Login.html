@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Admin Page</h1>
+        <form onsubmit="signin(event)" class="space-y-4">
+            <input
+                placeholder="Enter Your Email"
+                id="email"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+                placeholder="Enter Password"
+                id="password"
+                type="password"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+            >
+                Signin
+            </button>
+           <p class="mt-4 text-sm text-center text-gray-600">
+      Don't have an account?
+      <a href="http://localhost:3000/adminSignup" class="text-blue-600 hover:underline">Sign up</a>
+
+    </p>
+    <p class="mt-4 text-sm text-center text-gray-600">
+      As User?
+      <a href="http://localhost:3000/" class="text-blue-600 hover:underline">Login</a>
+      
+    </p>
+        </form>
+    </div>
+
+    <script>
+     async function signin(event) {
+        event.preventDefault()
+        let email = document.getElementById("email").value
+        let password = document.getElementById("password").value
+        payload = {email, password}
+        const res = await fetch("http://localhost:3000/admin/Signin", {
+            method: "POST",
+            headers: {
+                "Content-type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        const data = await res.json()
+
+        if(res.ok){
+            console.log(data)
+            localStorage.setItem("admintoken", data.token)
+            const link = document.createElement("a")
+            link.href = "/courses"
+            link.click()
+        }
+     }
+    </script>
+</body>
+</html>

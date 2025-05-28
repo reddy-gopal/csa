@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Course Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex justify-center gap-4 mb-6">
+      <button onclick="append(event)" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Create</button>
+      <button onclick="update(event)" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Update</button>
+      <button onclick="preview(event)" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Preview</button>
+      <button onclick="logout(event)"  class="px-4 py-2 bg-red-500 text-white rounded hover:bg-green-600" >Logout</button>
+    </div>
+
+    <form id="form" class="space-y-4 bg-white p-6 rounded shadow">
+      <input id="title" class="w-full border px-3 py-2 rounded" placeholder="Title" required />
+      <input id="description" class="w-full border px-3 py-2 rounded" placeholder="Description" required />
+      <input id="imageURL" class="w-full border px-3 py-2 rounded" placeholder="Image URL" required />
+      <input id="price" class="w-full border px-3 py-2 rounded" placeholder="Price" required />
+      <input id="courseId" class="w-full border px-3 py-2 rounded" placeholder="Course ID (only for update)" />
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Course</button>
+    </form>
+
+    <div id="results1" class="mt-6 grid gap-4"></div>
+     <div id="results2" class="mt-6 grid gap-4"></div>
+     <div id="results3" class="mt-6 grid gap-4"></div>
+
+  </div>
+
+  <script>
+    const resultsDiv = document.getElementById("form");
+    const container1 = document.getElementById("results1");
+    const container2 = document.getElementById("results2");
+    const container3 = document.getElementById("results3");
+
+
+    function getPayload() {
+      return {
+        title: document.getElementById("title").value,
+        description: document.getElementById("description").value,
+        imageURL: document.getElementById("imageURL").value,
+        price: document.getElementById("price").value,
+        courseId: document.getElementById("courseId").value
+      };
+    }
+
+    function clearForm() {
+      document.getElementById("title").value = "";
+      document.getElementById("description").value = "";
+      document.getElementById("imageURL").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("courseId").value = "";
+    }
+
+    function addResult1(message, details) {
+      const card = document.createElement("div");
+      card.className = "p-4 bg-white rounded shadow";
+      card.innerHTML = `
+        <h2 class="text-lg font-semibold">${message}</h2>
+        <p>${details}</p>
+      `;
+      container1.appendChild(card);
+    }
+    function addResult2(message, details) {
+      const card = document.createElement("div");
+      card.className = "p-4 bg-white rounded shadow";
+      card.innerHTML = `
+        <h2 class="text-lg font-semibold">${message}</h2>
+        <p>${details}</p>
+      `;
+      container2.appendChild(card);
+    }
+     function addResult3(message, details) {
+      const card = document.createElement("div");
+      card.className = "p-4 bg-white rounded shadow";
+      card.innerHTML = `
+        <h2 class="text-lg font-semibold">${message}</h2>
+        <p>${details}</p>
+      `;
+      container3.appendChild(card);
+    }
+
+    async function append(event) {
+      event.preventDefault();
+  resultsDiv.classList.remove("hidden");
+  container1.classList.remove("hidden");
+  container2.classList.add("hidden");
+  container3.classList.add("hidden");
+  container3.innerHTML = ""; 
+      const payload = getPayload();
+
+
+      const res = await fetch("http://localhost:3000/admin/course", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "token": localStorage.getItem("admintoken")
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        addResult1(data.message, `This course is added with ID ${data.courseID}`);
+        clearForm();
+      }else {
+        addResult1(data.message, "Please fill out the form ")
+      }
+    }
+
+    async function update(event) {
+     event.preventDefault();
+  resultsDiv.classList.remove("hidden");
+  container1.classList.add("hidden");
+  container2.classList.remove("hidden");
+  container3.classList.add("hidden");
+  container3.innerHTML = ""; 
+      const payload = getPayload();
+
+      const res = await fetch("http://localhost:3000/admin/course", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "token": localStorage.getItem("admintoken")
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        addResult2(data.message, `This course was updated with ID ${payload.courseId}`);
+        clearForm();
+      }else {
+        addResult2(data.message, "Fill the form correctly")
+
+      }
+    }
+
+    async function preview(event) {
+       event.preventDefault();
+  resultsDiv.classList.add("hidden");
+  container1.classList.add("hidden");
+  container2.classList.add("hidden");
+  container3.classList.remove("hidden");
+  container3.innerHTML = ""; 
+
+      const res = await fetch("http://localhost:3000/admin/course/bulk", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "token": localStorage.getItem("admintoken")
+        }
+      });
+
+      const data = await res.json();
+      console.log(data.Available)
+      if (data.Available.length> 0) {
+        data.Available.map(course => {
+          const card = document.createElement("div");
+          card.className = "p-4 bg-white rounded shadow";
+          card.innerHTML = `
+            <h2 class="text-xl font-bold">${course.title}</h2>
+            <img src="${course.imageURL}" alt="${course.title}" class="w-full max-h-48 object-cover rounded my-2" />
+            <p class="text-gray-700 mb-2">${course.description}</p>
+            <span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded">Price :${course.price}</span>
+            <p>Created by ${course.creatorId}</p>
+          `;
+          container3.appendChild(card);
+        });
+      } else {
+        addResult3("No Courses are Uploaded","Upload the courses");
+      }
+    }
+     
+
+
+    async function logout(event) {
+      localStorage.removeItem("admintoken");
+      const link = document.createElement("a")
+      link.href = "http://localhost:3000/adminLogin"
+      document.body.appendChild(link)
+      link.click()
+      
+    }
+  </script>
+</body>
+</html>

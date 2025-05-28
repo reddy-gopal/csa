@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">User Login</h2>
+    <form class="space-y-5" onsubmit="Signin(event)">
+      <div>
+        <label class="block text-gray-600 mb-1">Email</label>
+        <input type="email" name="email" required id="email"
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-gray-600 mb-1">Password</label>
+        <input type="password" name="password" required id="password"
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <button type="submit"
+              class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+        Log In
+      </button>
+    </form>
+    <p id="message"></p>
+    <p class="mt-4 text-sm text-center text-gray-600">
+      Don't have an account?
+      <a href="http://localhost:3000/signup" class="text-blue-600 hover:underline">Sign up</a>
+
+    </p>
+    <p class="mt-4 text-sm text-center text-gray-600">
+      As Admin?
+      <a href="http://localhost:3000/adminLogin" class="text-blue-600 hover:underline">Admin </a>
+      
+    </p>
+  </div>
+  <script>
+
+  async function Signin(event) {
+    event.preventDefault();
+  
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const messageEl = document.getElementById("message");
+  
+    const payload = { email, password };
+    console.log(payload)
+  
+    try {
+      const res = await fetch("http://localhost:3000/user/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+  
+      const data = await res.json();
+      console.log("Response from backend:", data);
+  
+      if (res.ok && data.token) {
+        localStorage.setItem("token", data.token);
+        messageEl.textContent = "Signin successful!";
+        messageEl.className = "mt-4 text-center text-green-600 font-semibold";
+        const link = document.createElement("a");
+        link.href = "/home";
+        document.body.appendChild(link);
+        link.click();
+      } else {
+        messageEl.textContent = data.message || "Signin failed";
+        messageEl.className = "mt-4 text-center text-red-600 font-semibold";
+      }
+    } catch (error) {
+      messageEl.textContent = "An error occurred during signin.";
+      messageEl.className = "mt-4 text-center text-red-600 font-semibold";
+      console.error("Signin error:", error);
+    }
+  }
+</script>
+  
+</body>
+</html>
