@@ -55,25 +55,40 @@
   window.location.href = "/login.html"; 
 }
     async function fetchCourses() {
+
       try {
+        const purchasedRes = await fetch("http://localhost:3000/user/purchases", {
+      headers: {
+        "Content-Type": "application/json",
+        "token": localStorage.getItem("token")
+      }
+    });
+    const purchasedData = await purchasedRes.json();
+    // Extract purchased course IDs
+    const purchasedIds = (purchasedData.purchased || []).map(c => c.courseId);
         const res = await fetch("http://localhost:3000/courses/preview");
         const data = await res.json();
         const container = document.getElementById("courseContainer");
-
+       
        
 
         if (data.courses) {
           data.courses.map(course => {
             const card = document.createElement("div");
             card.className = "bg-white p-6 rounded-lg shadow hover:shadow-lg transition";
-            card.innerHTML = `
+            const isPurchased = purchasedIds.includes(course._id);
+
+         card.innerHTML = `
   <img src="${course.imageURL || 'https://img.icons8.com/clouds/100/000000/book.png'}" alt="${course.title}" class="h-40 w-full object-cover mb-4 rounded-md">
   <h3 class="text-xl font-semibold mb-2">${course.title}</h3>
   <p class="text-gray-600 text-sm mb-4">${course.description?.slice(0, 100) || 'No description available'}...</p>
   <span class="block text-blue-600 font-bold mb-2">$${course.price || 'Free'}</span>
-  <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full" onClick="buy('${course._id}')">Enroll Now</button>
+  ${
+    isPurchased
+      ? `<button class="bg-gray-400 text-white px-4 py-2 rounded w-full cursor-not-allowed" disabled>Purchased Already</button>`
+      : `<button id="buy-btn-${course._id}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full" onClick="buy('${course._id}')">Enroll Now</button>`
+  }
 `;
-
             container.appendChild(card);
           });
         } else {
@@ -86,7 +101,7 @@
     }
 
     fetchCourses();
-    async function buy(courseId) {
+ async function buy(courseId) {
   try {
     const res = await fetch("http://localhost:3000/courses/purchase", {
       method: "POST",
@@ -101,6 +116,13 @@
 
     if (res.ok) {
       alert(data.message || "Purchase successful!");
+      const btn = document.getElementById(`buy-btn-${courseId}`);
+if (btn) {
+  btn.textContent = "Purchased Already";
+  btn.className = "bg-gray-400 text-white px-4 py-2 rounded w-full cursor-not-allowed";
+  btn.disabled = true;
+  btn.removeAttribute("onClick");
+}
     } else {
       alert(data.message || "Purchase failed.");
     }
